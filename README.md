@@ -26,6 +26,7 @@ Installation:
   	- Ensure you have portaudio
 
   		  sudo yum -y install portaudio  # for Fedora/RedHat distros
+
   		  sudo apt-get install portaudio # for Ubuntu/Debian distros
 
   - Windows
