@@ -19,6 +19,7 @@ Installation:
   	- Install portaudio from Homebrew
 
   		  brew install portaudio
+
   		  brew link portaudio
 
   - Linux
