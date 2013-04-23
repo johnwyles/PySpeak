@@ -3,10 +3,11 @@ import audioop
 import logging
 import os
 import pyaudio
-import wave
+import subprocess
 import time
 import urllib
 import urllib2
+import wave
 from pprint import pprint
 from collections import deque
 
@@ -15,8 +16,8 @@ class Listener():
     LANGUAGE = 'en-US'
     MAX_RESULTS = 6
 
-    def __init__(self, destination='file', silence_limit=2, threshold=20, bits=pyaudio.paInt16, channels=1, rate=16000, chunk=1024):
-        self.destination = destination
+    def __init__(self, destination_filename='file', silence_limit=2, threshold=20, bits=pyaudio.paInt16, channels=1, rate=44100, chunk=1024):
+        self.destination_filename = destination_filename
         self.all_chunks = []
         self.bits = bits
         self.channels = channels
@@ -28,8 +29,8 @@ class Listener():
 
     def start(self):
         logging.info('Listening for speech input')
-        self.p = pyaudio.PyAudio()
-        self.stream = self.p.open(format = self.bits,
+        self.pyaudio_handler = pyaudio.PyAudio()
+        self.stream = self.pyaudio_handler.open(format = self.bits,
               channels = self.channels,
               rate = self.rate,
               input = True,
@@ -44,7 +45,7 @@ class Listener():
                 data = self.stream.read(self.chunk)
             except IOError as e:
                 data = '\x00' * self.chunk
-                print e
+                logging.warning('Probably just a hiccup in the recording: ' + str(e))
 
             sliding_window.append(abs(audioop.avg(data, 2)))
 
@@ -56,43 +57,44 @@ class Listener():
             elif(started == True):
                 logging.info('Speech input no longer detected')
                 data = ''.join(self.all_chunks)
-                wf = wave.open(self.destination + '.wav', 'wb')
-                wf.setnchannels(self.channels)
-                wf.setsampwidth(self.p.get_sample_size(self.bits))
-                wf.setframerate(self.rate)
-                wf.writeframes(data)
-                wf.close()
-                self.stt_google_wav()
+                wav_file = wave.open(self.destination_filename + '.wav', 'wb')
+                wav_file.setnchannels(self.channels)
+                wav_file.setsampwidth(self.pyaudio_handler.get_sample_size(self.bits))
+                wav_file.setframerate(self.rate)
+                wav_file.writeframes(data)
+                wav_file.close()
+                self.get_google_transciption()
                 started = False
                 sliding_window = deque(maxlen=self.silence_limit*rel)
                 self.all_chunks = []
 
-        print logging.info('Completed listening for speech input')
+        logging.info('Completed listening for speech input')
         self.stop()
 
 
     def stop(self):
-        print logging.info('Stopping speech input detection')
+        logging.info('Stopping speech input detection')
         self.stream.close()
-        self.p.terminate()
+        self.pyaudio_handler.terminate()
 
-        print logging.info('Writing out speech input')
+        logging.info('Writing out speech input')
         # write data to WAVE file
         data = ''.join(self.all_chunks)
-        wf = wave.open(self.destination, 'wb')
-        wf.setnchannels(self.channels)
-        wf.setsampwidth(self.p.get_sample_size(self.bits))
-        wf.setframerate(self.rate)
-        wf.writeframes(self.all_chunks)
-        wf.close()
-        print "* saved: %s" % self.destination
+        wav_file = wave.open(self.destination_filename, 'wb')
+        wav_file.setnchannels(self.channels)
+        wav_file.setsampwidth(self.pyaudio_handler.get_sample_size(self.bits))
+        wav_file.setframerate(self.rate)
+        wav_file.writeframes(self.all_chunks)
+        wav_file.close()
+        logging.info('Completed writing out files for the destination filename %s' % self.destination_filename)
 
 
-    def stt_google_wav(self):
+    def get_google_transciption(self):
         #Convert to flac
         logging.info('Opening speech input WAV file and converting to FLAC')
-        os.system("flac -f " + self.destination + '.wav')
-        file_handle = open(self.destination + '.flac','rb')
+        with open(os.devnull, 'wb') as devnull:
+            subprocess.check_call(['flac', '-f', self.destination_filename + '.wav'], stdout=devnull, stderr=subprocess.STDOUT)
+        file_handle = open(self.destination_filename + '.flac','rb')
         flac_cont = file_handle.read()
         file_handle.close()
 
@@ -102,9 +104,9 @@ class Listener():
         request = urllib2.Request(google_speech_url, data=flac_cont, headers=headers)
         url_handle = urllib2.urlopen(request)
         result = eval(url_handle.read())['hypotheses']
-        logging.info('Got response from Google: ' + result)
+        logging.info('Got response from Google: ' + str(result))
         logging.info('Removing speech input WAV and FLAC files')
-        map(os.remove, ([self.destination + '.wav', self.destination + '.flac']))
+        map(os.remove, ([self.destination_filename + '.wav', self.destination_filename + '.flac']))
         return result
 
 
