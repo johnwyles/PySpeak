@@ -17,15 +17,14 @@ class Listener():
     MAX_RESULTS = 6
 
     def __init__(self, destination_filename='file', silence_limit=2, threshold=20, bits=pyaudio.paInt16, channels=1, rate=44100, chunk=1024):
+        self._all_chunks = []
         self.destination_filename = destination_filename
-        self.all_chunks = []
         self.bits = bits
         self.channels = channels
         self.rate = rate
         self.chunk = chunk
         self.silence_limit = silence_limit
         self.threshold = threshold
-        self.recorded_chunks = 0
 
     def start(self):
         logging.info('Listening for speech input')
@@ -53,43 +52,37 @@ class Listener():
                 if(not started):
                     logging.info('Speech input detected.  Recording raw audio')
                 started = True
-                self.all_chunks.append(data)
+                self._all_chunks.append(data)
             elif(started == True):
                 logging.info('Speech input no longer detected')
-                data = ''.join(self.all_chunks)
-                wav_file = wave.open(self.destination_filename + '.wav', 'wb')
-                wav_file.setnchannels(self.channels)
-                wav_file.setsampwidth(self.pyaudio_handler.get_sample_size(self.bits))
-                wav_file.setframerate(self.rate)
-                wav_file.writeframes(data)
-                wav_file.close()
-                self.get_google_transciption()
+                self._write()
+                self._get_google_transciption()
                 started = False
                 sliding_window = deque(maxlen=self.silence_limit*rel)
-                self.all_chunks = []
+                self._all_chunks = []
 
         logging.info('Completed listening for speech input')
         self.stop()
-
 
     def stop(self):
         logging.info('Stopping speech input detection')
         self.stream.close()
         self.pyaudio_handler.terminate()
 
+
+    def _write(self):
         logging.info('Writing out speech input')
-        # write data to WAVE file
-        data = ''.join(self.all_chunks)
-        wav_file = wave.open(self.destination_filename, 'wb')
+        data = ''.join(self._all_chunks)
+        wav_file = wave.open(self.destination_filename + '.wav', 'wb')
         wav_file.setnchannels(self.channels)
         wav_file.setsampwidth(self.pyaudio_handler.get_sample_size(self.bits))
         wav_file.setframerate(self.rate)
-        wav_file.writeframes(self.all_chunks)
+        wav_file.writeframes(data)
         wav_file.close()
         logging.info('Completed writing out files for the destination filename %s' % self.destination_filename)
 
 
-    def get_google_transciption(self):
+    def _get_google_transciption(self):
         #Convert to flac
         logging.info('Opening speech input WAV file and converting to FLAC')
         with open(os.devnull, 'wb') as devnull:
