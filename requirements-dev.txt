@@ -3,3 +3,5 @@ fabric
 sphinx
 coverage
 virtualenv
+nose
+coverage

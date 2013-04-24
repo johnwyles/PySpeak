@@ -7,7 +7,7 @@ import os, re
 # fabric
 from fabric.api import cd, env, execute, local, run, sudo, prefix
 # PySpeak
-import pyspeak
+from pyspeak import __version__
 
 
 def fast_commit(capture=True):
@@ -65,3 +65,9 @@ def md2rst(in_file, out_file):
 
 def readme():
     md2rst('README.md', 'README.txt')
+
+def tests():
+    """ Launch tests. """
+    local("nosetests")
+    # local("coverage html -d /tmp/coverage-projy --omit='projy/docopt.py'")
+    # local("coverage erase")
