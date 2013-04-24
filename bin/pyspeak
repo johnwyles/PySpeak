@@ -1,7 +1,0 @@
-#!/usr/bin/env python
-"""Run PySpeak."""
-import pyspeak.main
-try:
-    pyspeak.main.main()
-except KeyboardInterrupt:
-    exit(0)
