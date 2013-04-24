@@ -1,35 +1,40 @@
-==================================
 PySpeak
-==================================
+=======
 
-PySpeak is a speech recognition, voice recognition, text-to-speech
-and voice command engine. Typical usage looks like this:
+By: John Wyles Email: john@johnwyles.com Git:
+https://github.com/johnwyles/pyspeak
 
-    #!/usr/bin/env python
+Python Speech Recognition, Voice Recognition, Text-to-Speech and Voice
+Command Engine
 
-    import pyspeak
+Requirements: - portaudio
+(http://portaudio.com/docs/v19-doxydocs/tutorial\_start.html) - pyaudio
+(http://people.csail.mit.edu/hubert/pyaudio/compilation.html)
+
+Installation: - MacOS X - Install Homebrew if you don't already have it
+
+::
+
+          ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"
+
+    - Install portaudio and flac from Homebrew
+
+          brew install portaudio flac
+
+          brew link portaudio flac
+
+-  Linux
+
+   -  Ensure you have portaudio
+
+      sudo yum -y install portaudio-devel flac-devel # for Fedora/RedHat
+      distros
+
+      sudo apt-get install libportaudio-dev libflac-dev # for
+      Ubuntu/Debian distros
+
+-  Windows
+
+   -  Good luck! :)
 
 
-A word on Sphinx
-================
-Paragraphs are separated by blank lines. *Italics*, **bold**,
-and ``monospace`` look like this.
-
-Lists look like this:
-
-* First
-
-* Second. Can be multiple lines
-  but must be indented properly.
-
-A Sub-Section
--------------
-
-Numbered lists look like you'd expect:
-
-1. hi there
-
-2. must be going
-
-Urls are http://like.this and links can be
-written `like this <http://www.example.com/foo/bar>`_.
