@@ -1,0 +1,4 @@
+#!/usr/bin/evn python
+
+from pyspeak.commandline import execute
+execute()

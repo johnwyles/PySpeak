@@ -1,0 +1,5 @@
+PyAudio
+fabric
+sphinx
+coverage
+virtualenv
