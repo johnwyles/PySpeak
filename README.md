@@ -1,4 +1,4 @@
-pyspeak
+PySpeak
 =======
 By: John Wyles
 Email: john@johnwyles.com

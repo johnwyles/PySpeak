@@ -11,6 +11,8 @@ import wave
 from pprint import pprint
 from collections import deque
 
+APP_NAME = 'pyspeak'
+APP_VERSION = '0.0.1'
 
 class Listener():
     LANGUAGE = 'en-US'
@@ -127,11 +129,10 @@ class Listener():
 
 
 if __name__ == '__main__':
-    APP_NAME = 'pyspeak'
-    APP_VERSION = '0.0.1'
-
     # Parse command line arguments
     parser = argparse.ArgumentParser()
+    # parser.add_argument('-t', '--threshold', action=ValidateListenerArguments, help='The threshold for microphone sensitivity ()')
+    # parser.add_argument('-f', '--destination-filename', action=ValidateListenerArguments, help='The temporary filename and location for the recorded before it goes off to Google')
     parser.add_argument('-l', '--loglevel', default='INFO', help='Log level for console output (DEBUG, INFO, WARNING, ERROR, CRITICAL')
     parser.add_argument('-v', '--version', help='Get the version number and exit', const='version', nargs='?')
     arguments = parser.parse_args()
@@ -154,3 +155,14 @@ if __name__ == '__main__':
     # Setup the speech listener
     listener = Listener()
     listener.start()
+
+# class ValidateListenerArguments(argparse.Action):
+#     def __call__(self, parser, args, values, option_string=None):
+#         # print '{n} {v} {o}'.format(n=args, v=values, o=option_string)
+#         valid_subjects = ('foo', 'bar')
+#         subject, credits = values
+#         if subject not in valid_subjects:
+#             raise ValueError('invalid subject {s!r}'.format(s=subject))
+#         credits = float(credits)
+#         Credits = collections.namedtuple('Credits', 'subject required')
+#         setattr(args, self.dest, Credits(subject, credits))
