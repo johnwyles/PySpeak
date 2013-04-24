@@ -16,27 +16,33 @@ class Listener():
     LANGUAGE = 'en-US'
     MAX_RESULTS = 6
 
-    def __init__(self, destination_filename='file', silence_limit=2, threshold=20, bits=pyaudio.paInt16, channels=1, rate=44100, chunk=1024):
+    def __init__(self, destination_filename='pyaudio_file', silence_time=2, threshold=20, bits=pyaudio.paInt16, channels=1, rate=44100, chunk=1024):
+        logging.info('PySpeak listener initializing')
+        self.pyaudio_handler = pyaudio.PyAudio()
+        device_input_index = self._find_input_device_index()
+        if not self.pyaudio_handler.is_format_supported(input_device=device_input_index, rate=rate, input_channels=channels, input_format=bits):
+            logging.error('Unsupported format given while initializing')
+            exit(1)
+
         self._all_chunks = []
         self.destination_filename = destination_filename
         self.bits = bits
         self.channels = channels
         self.rate = rate
         self.chunk = chunk
-        self.silence_limit = silence_limit
+        self.silence_time = silence_time
         self.threshold = threshold
 
     def start(self):
         logging.info('Listening for speech input')
-        self.pyaudio_handler = pyaudio.PyAudio()
-        self.stream = self.pyaudio_handler.open(format = self.bits,
-              channels = self.channels,
-              rate = self.rate,
-              input = True,
-              frames_per_buffer = self.chunk)
+        self.stream = self.pyaudio_handler.open(format=self.bits,
+            channels=self.channels,
+            rate=self.rate,
+            input=True,
+            frames_per_buffer=self.chunk)
 
         rel = self.rate/self.chunk
-        sliding_window = deque(maxlen=self.silence_limit*rel)
+        sliding_window = deque(maxlen=self.silence_time*rel)
         started = False
 
         while (True):
@@ -58,7 +64,7 @@ class Listener():
                 self._write()
                 self._get_google_transciption()
                 started = False
-                sliding_window = deque(maxlen=self.silence_limit*rel)
+                sliding_window = deque(maxlen=self.silence_time*rel)
                 self._all_chunks = []
 
         logging.info('Completed listening for speech input')
@@ -68,6 +74,23 @@ class Listener():
         logging.info('Stopping speech input detection')
         self.stream.close()
         self.pyaudio_handler.terminate()
+
+    def _find_input_device_index(self):
+        device_index = None            
+        for i in range( self.pyaudio_handler.get_device_count() ):     
+            devinfo = self.pyaudio_handler.get_device_info_by_index(i)   
+            logging.debug("Device %d: %s" % (i, devinfo["name"]))
+
+            for keyword in ["mic", "input"]:
+                if keyword in devinfo["name"].lower():
+                    logging.info("Found input: %d - %s" % (i, devinfo["name"]))
+                    device_index = i
+                    return device_index
+
+        if device_index == None:
+            logging.warning('No preferred input found; using default input device.')
+
+        return device_index
 
 
     def _write(self):
@@ -92,8 +115,8 @@ class Listener():
         file_handle.close()
 
         logging.info('Sending FLAC speech input to Google for interpretation')
-        google_speech_url = 'https://www.google.com/speech-api/v1/recognize?xjerr=1&client=chromium&pfilter=2&lang=%s&maxresults=%s'%(self.LANGUAGE, self.MAX_RESULTS)
-        headers = {"User-Agent": "Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/16.0.912.63 Safari/535.7",'Content-type': 'audio/x-flac; rate=%s'%(self.rate)}
+        google_speech_url = 'https://www.google.com/speech-api/v1/recognize?xjerr=1&client=chromium&pfilter=2&lang=%s&maxresults=%s' % (self.LANGUAGE, self.MAX_RESULTS)
+        headers = {"User-Agent": "Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/16.0.912.63 Safari/535.7",'Content-type': 'audio/x-flac; rate=%s' % (self.rate)}
         request = urllib2.Request(google_speech_url, data=flac_cont, headers=headers)
         url_handle = urllib2.urlopen(request)
         result = eval(url_handle.read())['hypotheses']
@@ -116,7 +139,7 @@ if __name__ == '__main__':
     # Print the version number and exit
     if arguments.version:
         print APP_NAME + ": " + APP_VERSION
-        exit()
+        exit(0)
 
     # Setup logging
     try:
