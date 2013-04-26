@@ -5,6 +5,9 @@
 import argparse
 import logging
 
+from pyspeak import __version__
+import listener
+
 def execute():
     # Parse command line arguments
     parser = argparse.ArgumentParser()
@@ -26,3 +29,6 @@ def execute():
         number_level
 
     logging.basicConfig(format='[%(asctime)s] [%(name)s] [%(levelname)s]: %(message)s', level=number_level, nargs='?')
+
+    listener = Listener()
+    listener.start()

@@ -13,7 +13,7 @@ from pyspeak import __version__
 def fast_commit(capture=True):
     """ Fast commit with generic message. """
     env.warn_only = True
-    local('git commit -am"fast commit through Fabric"')
+    local('git commit -a -m "fast_commit through Fabric"')
 
 
 def push():
