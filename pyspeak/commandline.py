@@ -6,7 +6,7 @@ import argparse
 import logging
 
 from pyspeak import __version__
-import listener
+from listener import Listener
 
 def execute():
     # Parse command line arguments
