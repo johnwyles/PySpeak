@@ -33,15 +33,22 @@ Setup:
 	  - Good luck! :)
 
 Installation:
+
     sudo pip install pyspeak
 
 Usage:  
-    usage: pyspeak [-h] [-l LOGLEVEL] [-v [VERSION]]
+
+    usage: pyspeak [-h] [-l {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [-v]
+                   {listen,speak} ...
+
+    positional arguments:
+      {listen,speak}        Subcommand for pyspeak to either listen for microphone
+                            input (speech-to-text) or text input (text-to-speech)
+        listen              Listen for microphone input (speech-to-text)
+        speak               Listen for text input (text-to-speech
 
     optional arguments:
       -h, --help            show this help message and exit
-      -l LOGLEVEL, --loglevel LOGLEVEL
-                            Log level for console output (DEBUG, INFO, WARNING,
-                            ERROR, CRITICAL
-      -v [VERSION], --version [VERSION]
-                            Get the version number and exit
+      -l {DEBUG,INFO,WARNING,ERROR,CRITICAL}, --loglevel {DEBUG,INFO,WARNING,ERROR,CRITICAL}
+                            Log level for console output (default: INFO)
+      -v, --version         Get the version number and exit (default: False)

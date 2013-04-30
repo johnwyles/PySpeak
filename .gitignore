@@ -1,3 +1,5 @@
 stable_requirements.txt
 venv/
+old/
 *.pyc
+pyspeak_file.*

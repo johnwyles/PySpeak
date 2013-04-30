@@ -14,5 +14,5 @@ from nose.tools import assert_not_equal
 
 @SystemExit
 def test_info():
-    sys.argv = ['pyspeak', '-v']
+    sys.argv = ['pyspeak', '-h']
     execute()
