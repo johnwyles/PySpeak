@@ -14,6 +14,7 @@ import logging
 
 from pyspeak import __version__
 from listener import Listener
+from speaker import Speaker
 
 
 def execute():
@@ -72,3 +73,5 @@ def _speaker(arguments):
     Speaker subcommand callback
     """
     logging.info('Starting Speaker')
+    speaker = Speaker()
+    speaker.get_google_translation('en', 'Hello World!')

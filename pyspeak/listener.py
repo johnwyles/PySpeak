@@ -18,9 +18,7 @@ class Listener():
     """
     def __init__(self, filename_prefix='pyspeak_file', silence_time=2, threshold=80, language='en-US', max_results=4, bits=pyaudio.paInt16, channels=1, rate=44100, chunk=2048):
         """
-        Initializer
-
-        TODO(): Put more information here
+        Setup the pyaudio instance and other initialize other instance variables
         """
         logging.info('Listener is initializing')
         
@@ -155,15 +153,15 @@ class Listener():
         file_handle.close()
 
         logging.info('Sending FLAC speech input to Google for interpretation')
-        google_speech_url = 'https://www.google.com/speech-api/v1/recognize?xjerr=1&client=chromium&pfilter=2&lang=%s&maxresults=%s' % (self.language, self.max_results)
-        headers = {"User-Agent": "Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/16.0.912.63 Safari/535.7",'Content-type': 'audio/x-flac; rate=%s' % (self.rate)}
-        request = urllib2.Request(google_speech_url, data=flac_cont, headers=headers)
+        google_speech_api_url = 'https://www.google.com/speech-api/v1/recognize?xjerr=1&client=chromium&pfilter=2&lang=%s&maxresults=%s'%(self.language, self.max_results)
+        headers = {"User-Agent": "Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/16.0.912.63 Safari/535.7",'Content-type': 'audio/x-flac; rate=%s'%(self.rate)}
+        request = urllib2.Request(google_speech_api_url, data=flac_cont, headers=headers)
         url_handle = urllib2.urlopen(request)
 
         result = eval(url_handle.read())['hypotheses']
         logging.info('Got response from Google: ' + str(result))
 
         logging.info('Removing speech input WAV and FLAC files')
-        map(os.remove, ([self.filename_prefix + '.wav', self.filename_prefix + '.flac']))
+        map(os.remove, ([self.filename_prefix+'.wav', self.filename_prefix+'.flac']))
 
         return result
