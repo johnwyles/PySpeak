@@ -1,7 +1,6 @@
 PySpeak
 =======
 By: John Wyles
-Email: john@johnwyles.com
 Git: https://github.com/johnwyles/pyspeak
 
 Python Speech Recognition, Voice Recognition, Text-to-Speech and Voice Command Engine
